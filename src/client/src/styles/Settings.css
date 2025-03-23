@@ -1,0 +1,170 @@
+.settings-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.settings-container h1 {
+  margin-bottom: 20px;
+  color: var(--primary-color);
+}
+
+.settings-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: var(--background-light);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.dark-theme .settings-section {
+  background-color: var(--chat-bg-dark);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.settings-section h2 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.settings-description {
+  margin-bottom: 20px;
+  color: var(--secondary-color);
+  font-size: 0.9rem;
+}
+
+.settings-help {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+  margin-top: 8px;
+}
+
+.settings-help code {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.dark-theme .settings-help code {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.webhook-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.webhook-input-group input {
+  flex: 1;
+}
+
+.test-webhook-btn {
+  width: 80px;
+}
+
+.webhook-test-result {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.webhook-test-result i {
+  margin-right: 8px;
+}
+
+.webhook-test-result.success {
+  background-color: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  color: #28a745;
+}
+
+.webhook-test-result.error {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+}
+
+.theme-options {
+  display: flex;
+  gap: 15px;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dark-theme .theme-option {
+  border-color: var(--border-dark);
+}
+
+.theme-option.active {
+  border-color: var(--primary-color);
+  background-color: rgba(16, 163, 127, 0.1);
+}
+
+.theme-option i {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+
+.theme-option input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-actions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.alert-success {
+  background-color: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
+
+.dark-theme .alert-success {
+  background-color: rgba(40, 167, 69, 0.2);
+  border-color: rgba(40, 167, 69, 0.4);
+}
+
+.account-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.info-item label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: var(--secondary-color);
+}
+
+@media (max-width: 768px) {
+  .webhook-input-group {
+    flex-direction: column;
+  }
+  
+  .test-webhook-btn {
+    width: 100%;
+  }
+}
