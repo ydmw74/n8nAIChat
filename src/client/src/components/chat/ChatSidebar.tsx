@@ -5,6 +5,7 @@ import './ChatSidebar.css';
 interface Chat {
   id: number;
   title: string;
+  session_id?: string;
   created_at: string;
 }
 

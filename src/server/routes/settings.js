@@ -143,10 +143,14 @@ router.post('/test-webhook', auth, async (req, res) => {
           binaryFieldName = settings.n8n_binary_field;
         }
         
+        // Generate a test session ID
+        const testSessionId = `n8n_test_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+        
         const testPayload = {
           message: 'This is a test message from n8n-chat',
           userId: req.user.id,
           chatId: 0,
+          sessionId: testSessionId,
           test: true
         };
         

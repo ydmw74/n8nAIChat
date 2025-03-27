@@ -75,10 +75,31 @@ const initDatabase = () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
       title TEXT NOT NULL,
+      session_id TEXT UNIQUE,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users (id)
     )
   `);
+  
+  // Check if session_id column exists, add it if not
+  db.all("PRAGMA table_info(chats)", [], (err, columns) => {
+    if (err) {
+      console.error('Error checking chats table schema:', err.message);
+      return;
+    }
+    
+    const columnExists = columns.some(col => col.name === 'session_id');
+    if (!columnExists) {
+      console.log('Adding session_id column to chats table...');
+      db.run(`ALTER TABLE chats ADD COLUMN session_id TEXT`, (err) => {
+        if (err) {
+          console.error('Error adding session_id column:', err.message);
+        } else {
+          console.log('session_id column added successfully');
+        }
+      });
+    }
+  });
 
   // Create messages table
   db.run(`

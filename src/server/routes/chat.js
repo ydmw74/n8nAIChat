@@ -109,10 +109,13 @@ router.get('/:id', auth, (req, res) => {
 // @access  Private
 router.post('/', auth, (req, res) => {
   const { title = 'New Chat' } = req.body;
+  
+  // Generate a unique session ID
+  const sessionId = `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
   db.run(
-    'INSERT INTO chats (user_id, title) VALUES (?, ?)',
-    [req.user.id, title],
+    'INSERT INTO chats (user_id, title, session_id) VALUES (?, ?, ?)',
+    [req.user.id, title, sessionId],
     function (err) {
       if (err) {
         console.error(err.message);
@@ -123,6 +126,7 @@ router.post('/', auth, (req, res) => {
         id: this.lastID,
         user_id: req.user.id,
         title,
+        session_id: sessionId,
         created_at: new Date().toISOString()
       });
     }
@@ -235,7 +239,8 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                       const jsonPayload = {
                         message: content,
                         userId: req.user.id,
-                        chatId: chat.id
+                        chatId: chat.id,
+                        sessionId: chat.session_id || `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
                       };
                       
                       formData.append('json', JSON.stringify(jsonPayload));
@@ -261,7 +266,8 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                       const payload = {
                         message: content,
                         userId: req.user.id,
-                        chatId: chat.id
+                        chatId: chat.id,
+                        sessionId: chat.session_id || `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
                       };
                       
                       console.log("Sending JSON payload to n8n:", JSON.stringify(payload, null, 2));
