@@ -33,14 +33,16 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
 
 3. Create a `.env` file in the root directory with the following content:
    ```
-   PORT=5000
+   PORT=5005
    JWT_SECRET=your_secret_key_here
    ```
    Note: In production, use a strong, unique JWT_SECRET.
 
    The application is configured to listen on all network interfaces (0.0.0.0), 
    which means it will be accessible from other devices on your network using your 
-   machine's IP address (e.g., http://192.168.1.10:5000).
+   machine's IP address (e.g., http://192.168.1.10:5005).
+
+   Note: This application uses port 5005 instead of the traditional 5000 to avoid conflicts with other applications that commonly use port 5000.
 
 4. Setup an n8n webhook:
    - Create a new workflow in n8n
@@ -57,7 +59,7 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
    ```
    npm run server
    ```
-   The server will start on port 5000 by default (or the port specified in your .env file).
+   The server will start on port 5005 by default (or the port specified in your .env file).
 
 2. In a separate terminal, start the frontend client:
    ```
@@ -79,7 +81,7 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
    npm start
    ```
    
-3. Access the application at the configured port (default: `http://localhost:5000`)
+3. Access the application at the configured port (default: `http://localhost:5005`)
 
 ## Troubleshooting
 
@@ -113,15 +115,28 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
 4. Add processing nodes for your chatbot functionality
 5. Make sure your final node returns a JSON response
 
+### Customizable Webhook Field Names
+
+You can customize all field names used in the webhook payload through the Settings page:
+
+- **Message Field Name**: Field name for the message content (default: "message")
+- **User ID Field Name**: Field name for the user identifier (default: "userId")
+- **Chat ID Field Name**: Field name for the chat identifier (default: "chatId")
+- **Session ID Field Name**: Field name for the session identifier (default: "sessionId")
+- **Binary Field Name**: Field name for binary data (file uploads) (default: "data")
+
+This allows for flexible integration with different n8n workflow configurations or third-party services.
+
 ### Data Format
 
-For simple text messages, your n8n webhook will receive data in this format:
+For simple text messages, your n8n webhook will receive data with your configured field names:
 
 ```json
 {
-  "message": "User's message content",
-  "userId": 1,
-  "chatId": 123
+  "message": "User's message content",  // or your custom field name
+  "userId": 1,                          // or your custom field name
+  "chatId": 123,                        // or your custom field name
+  "sessionId": "n8n_1234567890_abcdef"  // or your custom field name
 }
 ```
 
@@ -132,15 +147,16 @@ When files are uploaded, the app sends them as binary data using multipart/form-
 1. The JSON payload is included as a field named 'json' containing:
    ```json
    {
-     "message": "User's message content",
-     "userId": 1,
-     "chatId": 123
+     "message": "User's message content",  // or your custom field name
+     "userId": 1,                          // or your custom field name
+     "chatId": 123,                        // or your custom field name
+     "sessionId": "n8n_1234567890_abcdef"  // or your custom field name
    }
    ```
 
-2. The binary data is sent in fields named according to your settings:
+2. The binary data is sent in fields named according to your binary field setting:
    - The first file uses the name you specify in Settings (default is "data")
-   - Additional files use incrementing names: data1, data2, etc.
+   - Additional files use incrementing names: data1, data2, etc. (based on your custom binary field name)
 
 In your n8n workflow, you'll need to:
 - Enable "Binary Data" in the Webhook configuration
@@ -149,15 +165,25 @@ In your n8n workflow, you'll need to:
 
 ### Expected Response Format
 
-Your n8n webhook workflow should return a response with the following structure:
+Your n8n webhook workflow can return a response in one of the following formats:
 
+1. Using the `output` field (recommended):
+```json
+{
+  "output": "Assistant's response message"
+}
+```
+
+2. Using the `response` field (legacy format):
 ```json
 {
   "response": "Assistant's response message"
 }
 ```
 
-If you return a different format, the application will fall back to stringifying the entire response.
+3. Any other JSON format will be stringified and displayed as text.
+
+The application prioritizes checking for the `output` field first, then the `response` field, and falls back to stringifying the entire response if neither is found.
 
 ### Example Workflow
 
@@ -205,7 +231,7 @@ Here's a simple n8n workflow example for handling both messages and files:
    // Return the correctly formatted response
    return {
      json: {
-       response: response
+       output: response  // Using the recommended 'output' field format
      }
    };
    ```
