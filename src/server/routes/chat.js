@@ -217,9 +217,12 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                       console.error('Error getting settings:', err.message);
                       throw new Error('Failed to get user settings');
                     }
-                    
-                    // Default to 'data' if not specified
+                    // Get field names from settings or use defaults
                     const binaryFieldName = (fullSettings && fullSettings.n8n_binary_field) || 'data';
+                    const messageField = (fullSettings && fullSettings.n8n_message_field) || 'message';
+                    const userIdField = (fullSettings && fullSettings.n8n_user_id_field) || 'userId';
+                    const chatIdField = (fullSettings && fullSettings.n8n_chat_id_field) || 'chatId';
+                    const sessionIdField = (fullSettings && fullSettings.n8n_session_id_field) || 'sessionId';
                     
                     console.log('===== DEBUG: CHAT MESSAGE SUBMISSION =====');
                     console.log('Message:', content);
@@ -235,13 +238,13 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                       const FormData = require('form-data');
                       const formData = new FormData();
                       
-                      // Add message JSON
-                      const jsonPayload = {
-                        message: content,
-                        userId: req.user.id,
-                        chatId: chat.id,
-                        sessionId: chat.session_id || `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
-                      };
+                      // Create dynamic message JSON with custom field names
+                      const jsonPayload = {};
+                      // Add fields with custom field names
+                      jsonPayload[messageField] = content;
+                      jsonPayload[userIdField] = req.user.id;
+                      jsonPayload[chatIdField] = chat.id;
+                      jsonPayload[sessionIdField] = chat.session_id || `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
                       
                       formData.append('json', JSON.stringify(jsonPayload));
                       
@@ -263,12 +266,12 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                       });
                     } else {
                       // Send simple JSON if no files
-                      const payload = {
-                        message: content,
-                        userId: req.user.id,
-                        chatId: chat.id,
-                        sessionId: chat.session_id || `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
-                      };
+                      const payload = {};
+                      // Add fields with custom field names
+                      payload[messageField] = content;
+                      payload[userIdField] = req.user.id;
+                      payload[chatIdField] = chat.id;
+                      payload[sessionIdField] = chat.session_id || `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
                       
                       console.log("Sending JSON payload to n8n:", JSON.stringify(payload, null, 2));
                       
@@ -283,9 +286,15 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                     // Store n8n response in database
                     let n8nResponse = 'No response from n8n';
                     
-                    if (response.data && response.data.response) {
+                    // Handle different response formats from n8n
+                    if (response.data && response.data.output) {
+                      // Handle format: { output: 'Message text' }
+                      n8nResponse = response.data.output;
+                    } else if (response.data && response.data.response) {
+                      // Handle format: { response: 'Message text' }
                       n8nResponse = response.data.response;
                     } else if (response.data) {
+                      // Fallback: use entire response data as JSON
                       n8nResponse = JSON.stringify(response.data);
                     }
                     

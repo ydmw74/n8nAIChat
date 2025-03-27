@@ -40,6 +40,10 @@ const initDatabase = () => {
       user_id INTEGER NOT NULL,
       n8n_webhook_url TEXT,
       n8n_binary_field TEXT DEFAULT 'data',
+      n8n_message_field TEXT DEFAULT 'message',
+      n8n_user_id_field TEXT DEFAULT 'userId',
+      n8n_chat_id_field TEXT DEFAULT 'chatId',
+      n8n_session_id_field TEXT DEFAULT 'sessionId',
       theme TEXT DEFAULT 'light',
       FOREIGN KEY (user_id) REFERENCES users (id)
     )
@@ -47,25 +51,34 @@ const initDatabase = () => {
     if (err) {
       console.error('Error creating settings table:', err.message);
     } else {
-      // Check if n8n_binary_field column exists, add it if not
-      db.all("PRAGMA table_info(settings)", [], (err, columns) => {
-        if (err) {
-          console.error('Error checking settings table schema:', err.message);
-          return;
-        }
-        
-        const columnExists = columns.some(col => col.name === 'n8n_binary_field');
-        if (!columnExists) {
-          console.log('Adding n8n_binary_field column to settings table...');
-          db.run(`ALTER TABLE settings ADD COLUMN n8n_binary_field TEXT DEFAULT 'data'`, (err) => {
-            if (err) {
-              console.error('Error adding n8n_binary_field column:', err.message);
-            } else {
-              console.log('n8n_binary_field column added successfully');
-            }
-          });
-        }
-      });
+      // Check and add columns if they don't exist
+      const addColumnIfNotExists = (columnName, defaultValue) => {
+        db.all("PRAGMA table_info(settings)", [], (err, columns) => {
+          if (err) {
+            console.error(`Error checking settings table schema for ${columnName}:`, err.message);
+            return;
+          }
+          
+          const columnExists = columns.some(col => col.name === columnName);
+          if (!columnExists) {
+            console.log(`Adding ${columnName} column to settings table...`);
+            db.run(`ALTER TABLE settings ADD COLUMN ${columnName} TEXT DEFAULT '${defaultValue}'`, (err) => {
+              if (err) {
+                console.error(`Error adding ${columnName} column:`, err.message);
+              } else {
+                console.log(`${columnName} column added successfully`);
+              }
+            });
+          }
+        });
+      };
+      
+      // Check for all required columns and add if missing
+      addColumnIfNotExists('n8n_binary_field', 'data');
+      addColumnIfNotExists('n8n_message_field', 'message');
+      addColumnIfNotExists('n8n_user_id_field', 'userId');
+      addColumnIfNotExists('n8n_chat_id_field', 'chatId');
+      addColumnIfNotExists('n8n_session_id_field', 'sessionId');
     }
   });
 

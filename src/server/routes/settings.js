@@ -47,7 +47,15 @@ router.get('/', auth, (req, res) => {
 // @desc    Update user settings
 // @access  Private
 router.put('/', auth, (req, res) => {
-  const { n8n_webhook_url, n8n_binary_field, theme } = req.body;
+  const { 
+    n8n_webhook_url, 
+    n8n_binary_field, 
+    n8n_message_field,
+    n8n_user_id_field,
+    n8n_chat_id_field,
+    n8n_session_id_field,
+    theme 
+  } = req.body;
   
   // Get existing settings
   db.get(
@@ -62,8 +70,26 @@ router.put('/', auth, (req, res) => {
       if (!settings) {
         // Create settings if they don't exist
         db.run(
-          'INSERT INTO settings (user_id, n8n_webhook_url, n8n_binary_field, theme) VALUES (?, ?, ?, ?)',
-          [req.user.id, n8n_webhook_url || '', n8n_binary_field || 'data', theme || 'light'],
+          `INSERT INTO settings (
+            user_id, 
+            n8n_webhook_url, 
+            n8n_binary_field, 
+            n8n_message_field,
+            n8n_user_id_field,
+            n8n_chat_id_field,
+            n8n_session_id_field,
+            theme
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            req.user.id, 
+            n8n_webhook_url || '', 
+            n8n_binary_field || 'data',
+            n8n_message_field || 'message',
+            n8n_user_id_field || 'userId',
+            n8n_chat_id_field || 'chatId',
+            n8n_session_id_field || 'sessionId',
+            theme || 'light'
+          ],
           function (err) {
             if (err) {
               console.error(err.message);
@@ -75,19 +101,44 @@ router.put('/', auth, (req, res) => {
               user_id: req.user.id,
               n8n_webhook_url: n8n_webhook_url || '',
               n8n_binary_field: n8n_binary_field || 'data',
+              n8n_message_field: n8n_message_field || 'message',
+              n8n_user_id_field: n8n_user_id_field || 'userId',
+              n8n_chat_id_field: n8n_chat_id_field || 'chatId',
+              n8n_session_id_field: n8n_session_id_field || 'sessionId',
               theme: theme || 'light'
             });
           }
         );
       } else {
-        // Update existing settings
+        // Update existing settings with defaults if not provided
         const updatedWebhookUrl = n8n_webhook_url !== undefined ? n8n_webhook_url : settings.n8n_webhook_url;
         const updatedBinaryField = n8n_binary_field !== undefined ? n8n_binary_field : (settings.n8n_binary_field || 'data');
+        const updatedMessageField = n8n_message_field !== undefined ? n8n_message_field : (settings.n8n_message_field || 'message');
+        const updatedUserIdField = n8n_user_id_field !== undefined ? n8n_user_id_field : (settings.n8n_user_id_field || 'userId');
+        const updatedChatIdField = n8n_chat_id_field !== undefined ? n8n_chat_id_field : (settings.n8n_chat_id_field || 'chatId');
+        const updatedSessionIdField = n8n_session_id_field !== undefined ? n8n_session_id_field : (settings.n8n_session_id_field || 'sessionId');
         const updatedTheme = theme !== undefined ? theme : settings.theme;
 
         db.run(
-          'UPDATE settings SET n8n_webhook_url = ?, n8n_binary_field = ?, theme = ? WHERE user_id = ?',
-          [updatedWebhookUrl, updatedBinaryField, updatedTheme, req.user.id],
+          `UPDATE settings SET 
+            n8n_webhook_url = ?, 
+            n8n_binary_field = ?, 
+            n8n_message_field = ?,
+            n8n_user_id_field = ?,
+            n8n_chat_id_field = ?,
+            n8n_session_id_field = ?,
+            theme = ? 
+          WHERE user_id = ?`,
+          [
+            updatedWebhookUrl, 
+            updatedBinaryField,
+            updatedMessageField,
+            updatedUserIdField,
+            updatedChatIdField,
+            updatedSessionIdField, 
+            updatedTheme, 
+            req.user.id
+          ],
           (err) => {
             if (err) {
               console.error(err.message);
@@ -99,6 +150,10 @@ router.put('/', auth, (req, res) => {
               user_id: req.user.id,
               n8n_webhook_url: updatedWebhookUrl,
               n8n_binary_field: updatedBinaryField,
+              n8n_message_field: updatedMessageField,
+              n8n_user_id_field: updatedUserIdField,
+              n8n_chat_id_field: updatedChatIdField,
+              n8n_session_id_field: updatedSessionIdField,
               theme: updatedTheme
             });
           }
@@ -143,16 +198,25 @@ router.post('/test-webhook', auth, async (req, res) => {
           binaryFieldName = settings.n8n_binary_field;
         }
         
+        // Get field names from settings, or use defaults
+        const messageField = settings?.n8n_message_field || 'message';
+        const userIdField = settings?.n8n_user_id_field || 'userId';
+        const chatIdField = settings?.n8n_chat_id_field || 'chatId';
+        const sessionIdField = settings?.n8n_session_id_field || 'sessionId';
+
         // Generate a test session ID
         const testSessionId = `n8n_test_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
         
+        // Create dynamic payload using the configured field names
         const testPayload = {
-          message: 'This is a test message from n8n-chat',
-          userId: req.user.id,
-          chatId: 0,
-          sessionId: testSessionId,
           test: true
         };
+        
+        // Add fields using dynamic keys
+        testPayload[messageField] = 'This is a test message from n8n-chat';
+        testPayload[userIdField] = req.user.id;
+        testPayload[chatIdField] = 0;
+        testPayload[sessionIdField] = testSessionId;
         
         try {
           console.log('Sending test payload:', testPayload);
@@ -164,17 +228,33 @@ router.post('/test-webhook', auth, async (req, res) => {
           console.log('Test webhook response:', response.data);
           
           if (response.status >= 200 && response.status < 300) {
-            // Check if the response has the correct format
-            if (response.data && (response.data.response || typeof response.data === 'object')) {
+            // Check if the response has a recognized format
+            if (response.data && response.data.output) {
+              // Format: { output: "text" }
               res.json({ 
                 success: true, 
-                message: 'Webhook connection successful',
+                message: 'Webhook connection successful (output format)',
+                response: response.data
+              });
+            } else if (response.data && response.data.response) {
+              // Format: { response: "text" }
+              res.json({ 
+                success: true, 
+                message: 'Webhook connection successful (response format)',
+                response: response.data
+              });
+            } else if (typeof response.data === 'object') {
+              // Any other object format
+              res.json({ 
+                success: true, 
+                message: 'Webhook connection successful (custom format)',
                 response: response.data
               });
             } else {
+              // Unrecognized format
               res.json({ 
                 success: true, 
-                message: 'Webhook connected but response format may not be optimal. Expected a response with { response: "text" } format.',
+                message: 'Webhook connected but response format may not be optimal. Expected a response with { output: "text" } or { response: "text" } format.',
                 response: response.data
               });
             }

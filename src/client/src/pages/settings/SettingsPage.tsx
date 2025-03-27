@@ -10,6 +10,10 @@ interface Settings {
   user_id?: number;
   n8n_webhook_url: string;
   n8n_binary_field: string;
+  n8n_message_field: string;
+  n8n_user_id_field: string;
+  n8n_chat_id_field: string;
+  n8n_session_id_field: string;
   theme: string;
 }
 
@@ -17,6 +21,10 @@ const SettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
     n8n_webhook_url: '',
     n8n_binary_field: 'data',
+    n8n_message_field: 'message',
+    n8n_user_id_field: 'userId',
+    n8n_chat_id_field: 'chatId',
+    n8n_session_id_field: 'sessionId',
     theme: 'light'
   });
   const [loading, setLoading] = useState(true);
@@ -148,18 +156,85 @@ const SettingsPage: React.FC = () => {
               </button>
             </div>
             
-            <div className="form-group" style={{ marginTop: '15px' }}>
-              <label htmlFor="n8n_binary_field">Binary Field Name</label>
-              <input
-                type="text"
-                id="n8n_binary_field"
-                name="n8n_binary_field"
-                value={settings.n8n_binary_field}
-                onChange={handleChange}
-                placeholder="data"
-              />
-              <div className="settings-help">
-                The field name to use for binary data (file uploads) in n8n. Default is "data".
+            <div className="settings-section" style={{ marginTop: '15px' }}>
+              <h3>Webhook Field Names</h3>
+              <p className="settings-description">
+                Customize the field names used in your webhook payload.
+              </p>
+              
+              <div className="form-group">
+                <label htmlFor="n8n_binary_field">Binary Field Name</label>
+                <input
+                  type="text"
+                  id="n8n_binary_field"
+                  name="n8n_binary_field"
+                  value={settings.n8n_binary_field}
+                  onChange={handleChange}
+                  placeholder="data"
+                />
+                <div className="settings-help">
+                  The field name to use for binary data (file uploads) in n8n. Default is "data".
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="n8n_message_field">Message Field Name</label>
+                <input
+                  type="text"
+                  id="n8n_message_field"
+                  name="n8n_message_field"
+                  value={settings.n8n_message_field}
+                  onChange={handleChange}
+                  placeholder="message"
+                />
+                <div className="settings-help">
+                  The field name for the message content. Default is "message".
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="n8n_user_id_field">User ID Field Name</label>
+                <input
+                  type="text"
+                  id="n8n_user_id_field"
+                  name="n8n_user_id_field"
+                  value={settings.n8n_user_id_field}
+                  onChange={handleChange}
+                  placeholder="userId"
+                />
+                <div className="settings-help">
+                  The field name for the user identifier. Default is "userId".
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="n8n_chat_id_field">Chat ID Field Name</label>
+                <input
+                  type="text"
+                  id="n8n_chat_id_field"
+                  name="n8n_chat_id_field"
+                  value={settings.n8n_chat_id_field}
+                  onChange={handleChange}
+                  placeholder="chatId"
+                />
+                <div className="settings-help">
+                  The field name for the chat identifier. Default is "chatId".
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="n8n_session_id_field">Session ID Field Name</label>
+                <input
+                  type="text"
+                  id="n8n_session_id_field"
+                  name="n8n_session_id_field"
+                  value={settings.n8n_session_id_field}
+                  onChange={handleChange}
+                  placeholder="sessionId"
+                />
+                <div className="settings-help">
+                  The field name for the session identifier. Default is "sessionId".
+                </div>
               </div>
             </div>
             

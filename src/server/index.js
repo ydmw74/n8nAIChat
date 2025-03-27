@@ -9,7 +9,7 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
-let PORT = parseInt(process.env.PORT || '5002', 10);
+let PORT = parseInt(process.env.PORT || '5005', 10);
 
 // Middleware
 app.use(cors());
