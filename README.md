@@ -22,7 +22,7 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
 1. Clone the repository:
    ```
    git clone https://github.com/ydmw74/n8nAIChat.git
-   cd n8n-chat
+   cd n8nAIChat
    ```
 
 2. Install dependencies:
