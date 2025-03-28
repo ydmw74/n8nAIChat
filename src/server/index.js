@@ -46,24 +46,90 @@ app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   // Check for different possible paths for client build files
+  const fs = require('fs');
   const possiblePaths = [
     path.join(__dirname, '../../client/build'),          // Regular path
     path.join(__dirname, '../client/build'),             // Docker path
-    path.join(__dirname, '../../src/client/build')       // Docker alternative path
+    path.join(__dirname, '../../src/client/build'),      // Docker alternative path
+    path.join(__dirname, '../../../client/build'),       // Another possible path
+    '/app/client/build',                                 // Direct Docker path
+    '/app/src/client/build'                              // Direct Docker alternative path
   ];
+  
+  console.log('=== DEBUG: Client Path Search ===');
+  console.log(`Current directory: ${__dirname}`);
   
   let clientBuildPath = null;
   
   // Find the first path that exists
   for (const testPath of possiblePaths) {
     try {
-      if (require('fs').existsSync(path.join(testPath, 'index.html'))) {
-        clientBuildPath = testPath;
-        console.log(`Found client build files at: ${clientBuildPath}`);
-        break;
+      console.log(`Checking path: ${testPath}`);
+      
+      if (fs.existsSync(testPath)) {
+        console.log(`- Directory exists: ${testPath}`);
+        
+        if (fs.existsSync(path.join(testPath, 'index.html'))) {
+          clientBuildPath = testPath;
+          console.log(`✓ Found client build files at: ${clientBuildPath}`);
+          break;
+        } else {
+          console.log(`- No index.html in ${testPath}`);
+        }
+      } else {
+        console.log(`- Directory does not exist: ${testPath}`);
       }
     } catch (err) {
-      console.log(`Path ${testPath} not found`);
+      console.log(`Error checking ${testPath}: ${err.message}`);
+    }
+  }
+  
+  // If no build path was found, create a fallback path with minimal index.html
+  if (!clientBuildPath) {
+    console.log('No client build path found. Creating fallback...');
+    
+    // Create the fallback directory and a minimal index.html
+    const fallbackPath = '/app/client/build';
+    
+    try {
+      // Create directories recursively if they don't exist
+      if (!fs.existsSync(fallbackPath)) {
+        fs.mkdirSync(fallbackPath, { recursive: true });
+        console.log(`Created fallback directory: ${fallbackPath}`);
+      }
+      
+      // Create a minimal index.html
+      const indexHtmlPath = path.join(fallbackPath, 'index.html');
+      const fallbackHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>n8n Chat</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+            .container { max-width: 800px; margin: 0 auto; }
+            .error { color: #e74c3c; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>n8n Chat</h1>
+            <p class="error">Client build files not found.</p>
+            <p>Please check container logs for more details.</p>
+            <p>API endpoints at <code>/api/*</code> should still be functional.</p>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      fs.writeFileSync(indexHtmlPath, fallbackHtml.trim());
+      console.log(`Created fallback index.html at: ${indexHtmlPath}`);
+      
+      clientBuildPath = fallbackPath;
+    } catch (err) {
+      console.error(`Failed to create fallback: ${err.message}`);
     }
   }
   
@@ -72,10 +138,10 @@ if (process.env.NODE_ENV === 'production') {
     app.get('*', (req, res) => {
       res.sendFile(path.resolve(clientBuildPath, 'index.html'));
     });
+    console.log(`Static files are being served from: ${clientBuildPath}`);
   } else {
-    console.error('Error: Could not find client build files');
-    console.error('Checked paths:');
-    possiblePaths.forEach(p => console.error(` - ${p}`));
+    console.error('CRITICAL ERROR: Could not find or create client build path');
+    console.error('API will work, but frontend will be unavailable');
   }
 }
 

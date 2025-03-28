@@ -1,0 +1,16 @@
+services:
+  n8n-chat:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    container_name: n8n-chat
+    ports:
+      - "5005:5005"
+    environment:
+      - NODE_ENV=production
+      - PORT=5005
+      - JWT_SECRET=change_this_in_production
+    volumes:
+      - ./src/database:/app/src/database  # Persist SQLite database
+      - ./src/uploads:/app/src/uploads    # Persist uploaded files
+    restart: unless-stopped

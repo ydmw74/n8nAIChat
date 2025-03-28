@@ -1,0 +1,52 @@
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# First install server deps to leverage caching
+COPY package*.json ./
+RUN npm install
+
+# Install client deps
+COPY src/client/package*.json ./src/client/
+RUN cd src/client && npm install
+
+# Copy all source files
+COPY . .
+
+# Build the React app
+RUN cd src/client && npm run build
+
+# Verify build output
+RUN echo "=== Build output verification ===" && \
+    ls -la src/client/build && \
+    if [ -f src/client/build/index.html ]; then \
+      echo "✅ Build successful! index.html found"; \
+    else \
+      echo "❌ Build failed! No index.html found"; \
+      exit 1; \
+    fi
+
+# Create client/build directory with the compiled files
+RUN mkdir -p client/build && \
+    cp -r src/client/build/* client/build/
+
+# Verify the copy worked
+RUN echo "=== Copy verification ===" && \
+    ls -la client/build && \
+    if [ -f client/build/index.html ]; then \
+      echo "✅ Copy successful! index.html found in client/build"; \
+    else \
+      echo "❌ Copy failed! No index.html found in client/build"; \
+      exit 1; \
+    fi
+
+# Expose port
+EXPOSE 5005
+
+# Add a healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget -qO- http://localhost:5005/ || exit 1
+
+# Start the server
+CMD ["npm", "start"]

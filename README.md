@@ -85,7 +85,31 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
 
 ### Docker Deployment
 
-The easiest way to run the application is using Docker:
+We provide multiple Docker deployment options to ensure reliable operation across different environments:
+
+#### Option 1: Simplified Docker Deployment (Recommended)
+
+This is the most reliable option that includes additional verification steps:
+
+1. Use the provided script to build and run:
+   ```bash
+   ./build-and-run.sh
+   ```
+   
+   Or manually:
+   ```bash
+   docker-compose -f docker-compose.simple.yml up -d
+   ```
+   
+2. Access the application at `http://localhost:5005`
+
+This simplified setup:
+- Uses a single-stage Dockerfile with explicit verification steps
+- Ensures client build files are properly created and copied
+- Includes health checks for container monitoring
+- Provides clear build failure detection
+
+#### Option 2: Standard Docker Deployment
 
 1. Build and start using Docker Compose for production:
    ```
@@ -106,21 +130,26 @@ The easiest way to run the application is using Docker:
    - Production: `http://localhost:5005` (single container serving both API and frontend)
    - Development: `http://localhost:3000` (React dev server) and `http://localhost:5005` (API)
 
-#### Important Docker Configuration Notes
+#### Docker Troubleshooting
 
-- The production setup uses a single container approach to simplify deployment
-- Static frontend files are built during the Docker build process
-- The backend server serves both the API and the pre-built frontend files
-- In Docker production mode, all requests are handled by the single container on port 5005
+If you encounter file path issues with build files in Docker:
+- The server includes a fallback mechanism that creates a minimal HTML page if build files aren't found
+- This ensures that even if the client build fails, the API will remain accessible
+- Try the simplified `docker-compose.simple.yml` which includes explicit verification steps
+- Check the logs with `docker-compose logs` to see detailed path debugging information
 
-4. To stop the containers:
-   ```
-   docker-compose down
-   ```
-   or
-   ```
-   docker-compose -f docker-compose.dev.yml down
-   ```
+#### To stop the containers:
+```
+docker-compose down
+```
+or
+```
+docker-compose -f docker-compose.simple.yml down
+```
+or
+```
+docker-compose -f docker-compose.dev.yml down
+```
 
 #### Docker Environment Variables
 
