@@ -85,26 +85,35 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
 
 ### Docker Deployment
 
-The easiest way to run the application, especially in production, is using Docker:
+The easiest way to run the application is using Docker:
 
-1. Build and start using Docker Compose:
+1. Build and start using Docker Compose for production:
    ```
    docker-compose up -d
    ```
    
    This will:
-   - Build the n8n Chat application
-   - Start both the n8n Chat application and an n8n instance
-   - Connect them on the same network
-   - Persist data in volumes
+   - Build the n8n Chat server (ExpressJS backend)
+   - Build the n8n Chat client (React frontend)
+   - Configure them to work together
+   - Persist database and uploads in volumes
 
-2. Access the applications:
-   - n8n Chat: `http://localhost:5005`
-   - n8n: `http://localhost:5678`
+2. For development with hot-reloading:
+   ```
+   docker-compose -f docker-compose.dev.yml up
+   ```
 
-3. To stop the containers:
+3. Access the application:
+   - Production: `http://localhost:5005` (served through backend)
+   - Development: `http://localhost:3000` (React dev server) and `http://localhost:5005` (API)
+
+4. To stop the containers:
    ```
    docker-compose down
+   ```
+   or
+   ```
+   docker-compose -f docker-compose.dev.yml down
    ```
 
 #### Docker Environment Variables
@@ -113,8 +122,7 @@ You can customize the Docker deployment by modifying the environment variables i
 
 - `PORT`: The port the application runs on (default: 5005)
 - `JWT_SECRET`: Secret key for JWT token generation (change this in production)
-- `N8N_HOST`: Hostname for n8n instance
-- `WEBHOOK_URL`: Base URL for n8n webhooks
+- `REACT_APP_API_URL`: The URL where the API is accessible
 
 ## Troubleshooting
 
