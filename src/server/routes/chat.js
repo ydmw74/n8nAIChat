@@ -238,15 +238,14 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                       const FormData = require('form-data');
                       const formData = new FormData();
                       
-                      // Create dynamic message JSON with custom field names
-                      const jsonPayload = {};
-                      // Add fields with custom field names
-                      jsonPayload[messageField] = content;
-                      jsonPayload[userIdField] = req.user.id;
-                      jsonPayload[chatIdField] = chat.id;
-                      jsonPayload[sessionIdField] = chat.session_id || `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
-                      
-                      formData.append('json', JSON.stringify(jsonPayload));
+                      // Add text fields directly to FormData to match the format without files
+                      // This is the key change - we're adding fields directly rather than as a JSON string
+                      formData.append(messageField, content);
+                      formData.append(userIdField, req.user.id.toString());
+                      formData.append(chatIdField, chat.id.toString());
+                      formData.append(sessionIdField, 
+                        chat.session_id || `n8n_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
+                      );
                       
                       // Add files to FormData
                       files.forEach((file, index) => {
@@ -257,6 +256,7 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                       });
                       
                       console.log("Sending multipart FormData to n8n with files");
+                      console.log(`Message field used: ${messageField}`);
                       
                       // Send message with files to n8n webhook
                       response = await axios.post(settings.n8n_webhook_url, formData, {

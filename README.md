@@ -228,14 +228,12 @@ For simple text messages, your n8n webhook will receive data with your configure
 
 When files are uploaded, the app sends them as binary data using multipart/form-data:
 
-1. The JSON payload is included as a field named 'json' containing:
-   ```json
-   {
-     "message": "User's message content",  // or your custom field name
-     "userId": 1,                          // or your custom field name
-     "chatId": 123,                        // or your custom field name
-     "sessionId": "n8n_1234567890_abcdef"  // or your custom field name
-   }
+1. The text fields are added directly to the FormData (same format as without files):
+   ```
+   message: "User's message content"       // or your custom field name
+   userId: 1                               // or your custom field name
+   chatId: 123                             // or your custom field name
+   sessionId: "n8n_1234567890_abcdef"     // or your custom field name
    ```
 
 2. The binary data is sent in fields named according to your binary field setting:
@@ -280,29 +278,24 @@ Here's a simple n8n workflow example for handling both messages and files:
 
 2. **Function** node: Process the message and files
    ```javascript
-   // Get the message
+   // Get the message from body
    let message = '';
    let files = [];
    
-   // Handle both direct JSON and form data with binary
+   // Get message directly from body (works both with and without files)
    if ($input.body && $input.body.message) {
-     // Direct JSON submission
      message = $input.body.message;
-   } else if ($input.body && $input.body.json) {
-     // FormData submission with binary files
-     const jsonData = JSON.parse($input.body.json);
-     message = jsonData.message;
-     
-     // Check for binary files
-     if ($binary) {
-       Object.keys($binary).forEach(key => {
-         files.push({
-           name: $binary[key].fileName,
-           type: $binary[key].mimeType,
-           size: $binary[key].fileSize
-         });
+   }
+   
+   // Check for binary files
+   if ($binary) {
+     Object.keys($binary).forEach(key => {
+       files.push({
+         name: $binary[key].fileName,
+         type: $binary[key].mimeType,
+         size: $binary[key].fileSize
        });
-     }
+     });
    }
    
    // Create a response
