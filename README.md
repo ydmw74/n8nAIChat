@@ -91,8 +91,12 @@ We provide multiple Docker deployment options to ensure reliable operation acros
 
 This is the most reliable option that includes additional verification steps:
 
-1. Use the provided script to build and run:
+1. Use the provided script to build and run (make it executable first):
    ```bash
+   # Make the script executable
+   chmod +x ./build-and-run.sh
+   
+   # Run the script
    ./build-and-run.sh
    ```
    
