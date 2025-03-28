@@ -27,6 +27,8 @@ WORKDIR /app
 COPY --from=base /app/package*.json ./
 COPY --from=base /app/src ./src
 COPY --from=base /app/src/client/build ./src/client/build
+# Also copy to the path that the server is looking for
+COPY --from=base /app/src/client/build ./client/build
 COPY --from=base /app/.env ./.env
 
 # Install production dependencies only

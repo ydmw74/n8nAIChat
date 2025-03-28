@@ -45,10 +45,38 @@ app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../client/build')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../../client/build', 'index.html'));
-  });
+  // Check for different possible paths for client build files
+  const possiblePaths = [
+    path.join(__dirname, '../../client/build'),          // Regular path
+    path.join(__dirname, '../client/build'),             // Docker path
+    path.join(__dirname, '../../src/client/build')       // Docker alternative path
+  ];
+  
+  let clientBuildPath = null;
+  
+  // Find the first path that exists
+  for (const testPath of possiblePaths) {
+    try {
+      if (require('fs').existsSync(path.join(testPath, 'index.html'))) {
+        clientBuildPath = testPath;
+        console.log(`Found client build files at: ${clientBuildPath}`);
+        break;
+      }
+    } catch (err) {
+      console.log(`Path ${testPath} not found`);
+    }
+  }
+  
+  if (clientBuildPath) {
+    app.use(express.static(clientBuildPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve(clientBuildPath, 'index.html'));
+    });
+  } else {
+    console.error('Error: Could not find client build files');
+    console.error('Checked paths:');
+    possiblePaths.forEach(p => console.error(` - ${p}`));
+  }
 }
 
 // Error handling for port already in use

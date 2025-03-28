@@ -93,9 +93,8 @@ The easiest way to run the application is using Docker:
    ```
    
    This will:
-   - Build the n8n Chat server (ExpressJS backend)
-   - Build the n8n Chat client (React frontend)
-   - Configure them to work together
+   - Build a single container containing both the backend and frontend
+   - Configure the Express.js server to serve the pre-built React app
    - Persist database and uploads in volumes
 
 2. For development with hot-reloading:
@@ -104,8 +103,15 @@ The easiest way to run the application is using Docker:
    ```
 
 3. Access the application:
-   - Production: `http://localhost:5005` (served through backend)
+   - Production: `http://localhost:5005` (single container serving both API and frontend)
    - Development: `http://localhost:3000` (React dev server) and `http://localhost:5005` (API)
+
+#### Important Docker Configuration Notes
+
+- The production setup uses a single container approach to simplify deployment
+- Static frontend files are built during the Docker build process
+- The backend server serves both the API and the pre-built frontend files
+- In Docker production mode, all requests are handled by the single container on port 5005
 
 4. To stop the containers:
    ```
