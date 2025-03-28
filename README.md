@@ -98,7 +98,7 @@ This is the most reliable option that includes additional verification steps:
    
    Or manually:
    ```bash
-   docker-compose -f docker-compose.simple.yml up -d
+   docker compose -f docker-compose.simple.yml up -d
    ```
    
 2. Access the application at `http://localhost:5005`
@@ -113,7 +113,7 @@ This simplified setup:
 
 1. Build and start using Docker Compose for production:
    ```
-   docker-compose up -d
+   docker compose up -d
    ```
    
    This will:
@@ -123,7 +123,7 @@ This simplified setup:
 
 2. For development with hot-reloading:
    ```
-   docker-compose -f docker-compose.dev.yml up
+   docker compose -f docker-compose.dev.yml up
    ```
 
 3. Access the application:
@@ -136,19 +136,19 @@ If you encounter file path issues with build files in Docker:
 - The server includes a fallback mechanism that creates a minimal HTML page if build files aren't found
 - This ensures that even if the client build fails, the API will remain accessible
 - Try the simplified `docker-compose.simple.yml` which includes explicit verification steps
-- Check the logs with `docker-compose logs` to see detailed path debugging information
+- Check the logs with `docker compose logs` to see detailed path debugging information
 
 #### To stop the containers:
 ```
-docker-compose down
+docker compose down
 ```
 or
 ```
-docker-compose -f docker-compose.simple.yml down
+docker compose -f docker-compose.simple.yml down
 ```
 or
 ```
-docker-compose -f docker-compose.dev.yml down
+docker compose -f docker-compose.dev.yml down
 ```
 
 #### Docker Environment Variables
