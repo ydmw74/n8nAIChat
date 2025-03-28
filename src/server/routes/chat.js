@@ -238,8 +238,7 @@ router.post('/:id/message', auth, upload.array('files', 5), async (req, res) => 
                       const FormData = require('form-data');
                       const formData = new FormData();
                       
-                      // Add text fields directly to FormData to match the format without files
-                      // This is the key change - we're adding fields directly rather than as a JSON string
+                      // Add text fields directly to FormData (same format as without files)
                       formData.append(messageField, content);
                       formData.append(userIdField, req.user.id.toString());
                       formData.append(chatIdField, chat.id.toString());

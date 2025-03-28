@@ -228,7 +228,7 @@ For simple text messages, your n8n webhook will receive data with your configure
 
 When files are uploaded, the app sends them as binary data using multipart/form-data:
 
-1. The text fields are added directly to the FormData (same format as without files):
+1. The text fields are added directly to the FormData (maintaining the same format as requests without files):
    ```
    message: "User's message content"       // or your custom field name
    userId: 1                               // or your custom field name
@@ -282,7 +282,7 @@ Here's a simple n8n workflow example for handling both messages and files:
    let message = '';
    let files = [];
    
-   // Get message directly from body (works both with and without files)
+   // Get message directly from body (works for both with and without files)
    if ($input.body && $input.body.message) {
      message = $input.body.message;
    }
