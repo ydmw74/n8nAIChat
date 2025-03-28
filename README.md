@@ -21,7 +21,7 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/n8n-chat.git
+   git clone https://github.com/ydmw74/n8nAIChat.git
    cd n8n-chat
    ```
 
