@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: ./src/client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - DANGEROUSLY_DISABLE_HOST_CHECK=true
+      - WDS_SOCKET_HOST=localhost
+      - WDS_SOCKET_PORT=0
+      - HOST=0.0.0.0
+      - REACT_APP_API_URL=http://localhost:5005
+    volumes:
+      - ./src/client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - n8n-network
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+      - NODE_ENV=development
+      - JWT_SECRET=dev_secret_key
+    volumes:
+      - ./src:/app/src
+      - /app/node_modules
+    networks:
+      - n8n-network
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_HOST=n8n
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - n8n-network
+
+networks:
+  n8n-network:
+    driver: bridge
+
+volumes:
+  n8n_data:

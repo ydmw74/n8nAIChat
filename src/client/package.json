@@ -11,6 +11,7 @@
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "axios": "^1.6.7",
+    "http-proxy-middleware": "^3.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.1",
@@ -19,9 +20,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "cross-env DANGEROUSLY_DISABLE_HOST_CHECK=true WDS_SOCKET_HOST=localhost WDS_SOCKET_PORT=0 react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -42,5 +43,12 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5005"
+  "proxy": "http://localhost:5005",
+  "devServer": {
+    "allowedHosts": "all"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "react-app-rewired": "^2.2.1"
+  }
 }

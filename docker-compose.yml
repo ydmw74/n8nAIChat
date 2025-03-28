@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  n8n-chat:
+    build: .
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+      - NODE_ENV=production
+      - JWT_SECRET=your_secret_key_change_in_production
+    env_file:
+      - .env.docker
+    volumes:
+      - ./src/database:/app/src/database
+      - ./src/uploads:/app/src/uploads
+    restart: unless-stopped
+    networks:
+      - n8n-network
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_HOST=n8n
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+    networks:
+      - n8n-network
+
+networks:
+  n8n-network:
+    driver: bridge
+
+volumes:
+  n8n_data:

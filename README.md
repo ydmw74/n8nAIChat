@@ -83,15 +83,52 @@ A ChatGPT-like web interface that integrates with n8n webhooks. This application
    
 3. Access the application at the configured port (default: `http://localhost:5005`)
 
+### Docker Deployment
+
+The easiest way to run the application, especially in production, is using Docker:
+
+1. Build and start using Docker Compose:
+   ```
+   docker-compose up -d
+   ```
+   
+   This will:
+   - Build the n8n Chat application
+   - Start both the n8n Chat application and an n8n instance
+   - Connect them on the same network
+   - Persist data in volumes
+
+2. Access the applications:
+   - n8n Chat: `http://localhost:5005`
+   - n8n: `http://localhost:5678`
+
+3. To stop the containers:
+   ```
+   docker-compose down
+   ```
+
+#### Docker Environment Variables
+
+You can customize the Docker deployment by modifying the environment variables in `docker-compose.yml`:
+
+- `PORT`: The port the application runs on (default: 5005)
+- `JWT_SECRET`: Secret key for JWT token generation (change this in production)
+- `N8N_HOST`: Hostname for n8n instance
+- `WEBHOOK_URL`: Base URL for n8n webhooks
+
 ## Troubleshooting
 
 - **Port conflicts**: If you encounter a "Port already in use" error, either:
   - Change the PORT value in your .env file
-  - Kill the process using the port: `npx kill-port 5000` (replace 5000 with your port)
+  - Kill the process using the port: `npx kill-port 5005` (replace 5005 with your port)
 
 - **File upload issues**: 
   - Make sure the 'Binary Data' option is enabled in your n8n webhook configuration
   - Check that you've set the binary field name correctly in the chat settings (default is "data")
+
+- **Webpack Dev Server issues**:
+  - If you encounter an error about `allowedHosts`, ensure you're using the proper configuration files
+  - For containerized environments, use the provided `.env.development` and `config-overrides.js` files
 
 ## Usage
 

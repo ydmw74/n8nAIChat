@@ -12,7 +12,22 @@ const app = express();
 let PORT = parseInt(process.env.PORT || '5005', 10);
 
 // Middleware
-app.use(cors());
+// Configure CORS for all origins (important for Docker/containerized deployments)
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
+  credentials: true
+}));
+
+// Set additional headers for cross-origin requests
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-auth-token');
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Note: Removed fileUpload middleware to avoid conflicts with multer in routes

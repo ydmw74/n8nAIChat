@@ -1,0 +1,19 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package.json files for server
+COPY package*.json ./
+
+# Install server dependencies
+RUN npm install
+
+# Set environment variables
+ENV PORT=5005
+ENV NODE_ENV=development
+
+# Expose the server port
+EXPOSE 5005
+
+# Command to run the server
+CMD ["npm", "run", "server"]

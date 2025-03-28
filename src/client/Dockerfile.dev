@@ -1,0 +1,28 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install client dependencies
+RUN npm install
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Set environment variables for React development server
+ENV DANGEROUSLY_DISABLE_HOST_CHECK=true
+ENV WDS_SOCKET_HOST=localhost
+ENV WDS_SOCKET_PORT=0
+ENV HOST=0.0.0.0
+
+# Expose the client port
+EXPOSE 3000
+
+# Use our custom entrypoint script
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# Command to run the client
+CMD ["npm", "start"]
