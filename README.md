@@ -1,6 +1,6 @@
 # n8n Chat
 
-A ChatGPT-like web interface that integrates with n8n webhooks. This application allows users to send chat messages and files to an n8n workflow and display the responses.
+An AI-chat interface that integrates with n8n webhooks. This application allows users to send chat messages and files to an n8n workflow and display the responses.
 
 ## Features
 
